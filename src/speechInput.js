@@ -7,6 +7,28 @@ const SpeechInput = () => {
   const recognitionRef = useRef(null);
   const inputRef = useRef(null);
 
+  const handleSend = async () => {
+  try {
+    const response = await fetch('http://127.0.0.1:8000/process-text', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ content: text }), // matches the "content" field in Python
+    });
+
+    const data = await response.json();
+    
+    if (data.status === "success") {
+      alert("API Response: " + data.message);
+      setText(''); // Clear the input after successful send
+    }
+  } catch (error) {
+    console.error("Error sending data to API:", error);
+    alert("Failed to connect to the server.");
+  }
+};
+
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
@@ -35,11 +57,6 @@ const SpeechInput = () => {
   const toggleListening = () => {
     if (!recognitionRef.current) return alert("Browser not supported.");
     isListening ? recognitionRef.current.stop() : recognitionRef.current.start();
-  };
-
-  const handleSend = () => {
-    alert(`Sending: ${text}`);
-    setText(''); // Optional: clear text after sending
   };
 
   return (
